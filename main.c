@@ -1,7 +1,11 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
+
+// tiny printf for micro controllers
+
 #include <ctype.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
 
 int x_write(char const *p, int n)
 {
@@ -29,33 +33,31 @@ int x_printf(char const *fmt, ...)
 			}
 			if (c == 0) break;
 			right++;
+			char sign = 0;
 			while (right < end) {
 				c = (unsigned char)*right++;
 				if (c == 'd') {
 					int v = va_arg(args, int);
-					if (v == 0) {
-						char d = '0';
-						ret += x_write(&d, 1);
+					int n = 0;
+					char tmp[12];
+					char *q = tmp + sizeof(tmp);
+					unsigned int u;
+					if (v < 0) {
+						sign = '-';
+						u = -v;
 					} else {
-						int n = 0;
-						char tmp[100];
-						char *q = tmp + sizeof(tmp);
-						int neg = 0;
-						if (v < 0) {
-							neg = 1;
-							v = -v;
-						}
-						while (v > 0) {
-							*--q = '0' + (v % 10);
-							v /= 10;
-							n++;
-						}
-						if (neg) {
-							*--q = '-';
-							n++;
-						}
-						ret += x_write(q, n);
+						u = v;
 					}
+					do {
+						*--q = '0' + (u % 10);
+						u /= 10;
+						n++;
+					} while (u > 0);
+					if (sign != 0) {
+						*--q = sign;
+						n++;
+					}
+					ret += x_write(q, n);
 					break;
 				}
 				if (c == 's') {
@@ -73,6 +75,9 @@ int x_printf(char const *fmt, ...)
 					ret += x_write(left, right - left);
 					break;
 				}
+				if (c == '+') {
+					sign = c;
+				}
 			}
 			left = right;
 		} else {
@@ -85,6 +90,6 @@ int x_printf(char const *fmt, ...)
 
 int main()
 {
-	x_printf("Hello,%d %s%c\n", 42, "world", '!');
+	x_printf("Hello,%d %s%c\n", INT_MAX, "world", '!');
 	return 0;
 }
