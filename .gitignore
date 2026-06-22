@@ -1,0 +1,7 @@
+main.d
+main.o
+_bin/
+.qtcreator
+build/
+myapp
+
