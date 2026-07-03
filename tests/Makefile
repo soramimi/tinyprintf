@@ -1,14 +1,14 @@
 
-NAME := myapp
+NAME := test
 PROJDIR := .
 
-SRCS := main.c tinyprintf.c
-LIBS :=
+SRCS := test_tinyprintf.cpp ../tinyprintf.c
+LIBS := -lgtest
 
 CC := gcc
 CXX := g++
 LD := $(CXX)
-INCLUDEPATH :=
+INCLUDEPATH := -I..
 CFLAGS := -O3 $(INCLUDEPATH)
 CXXFLAGS := -O3 $(INCLUDEPATH)
 

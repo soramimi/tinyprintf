@@ -5,4 +5,5 @@ CONFIG -= qt
 DESTDIR = $$PWD/../_bin
 
 SOURCES += \
-        ../main.c
+        ../main.c \
+        ../tinyprintf.c

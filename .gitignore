@@ -1,5 +1,5 @@
-main.d
-main.o
+*.d
+*.o
 _bin/
 .qtcreator
 build/
