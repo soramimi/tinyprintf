@@ -33,13 +33,15 @@ int x_printf(char const *fmt, ...)
 			}
 			if (c == 0) break;
 			right++;
+			int width = 0;
 			char sign = 0;
+			char padding = 0;
 			while (right < end) {
 				c = (unsigned char)*right++;
 				if (c == 'd') {
 					int v = va_arg(args, int);
 					int n = 0;
-					char tmp[12];
+					char tmp[16];
 					char *q = tmp + sizeof(tmp);
 					unsigned int u;
 					if (v < 0) {
@@ -53,10 +55,49 @@ int x_printf(char const *fmt, ...)
 						u /= 10;
 						n++;
 					} while (u > 0);
-					if (sign != 0) {
-						*--q = sign;
+					
+					char pad = padding ? padding : ' ';
+					
+					if (sign != 0 && pad != '0') { *--q = sign; n++; }
+					
+					int w = sizeof(tmp);
+					w = w < width ? w : width;
+					if (sign != 0 && w > 0) {
+						w--;
+					}
+					
+					while (n < w) {
+						*--q = pad;
 						n++;
 					}
+					
+					if (sign != 0 && pad == '0') { *--q = sign; n++; }
+					
+					ret += x_write(q, n);
+					break;
+				}
+				if (c == 'x' || c == 'X') {
+					unsigned int u = va_arg(args, unsigned int);
+					int n = 0;
+					char tmp[16];
+					char *q = tmp + sizeof(tmp);
+					do {
+						char d = u & 0xf;
+						d = d < 10 ? ('0' + d) : ((c == 'x' ? 'a' : 'A') + (d - 10));
+						*--q = d;
+						u >>= 4;
+						n++;
+					} while (u > 0);
+					
+					char pad = padding ? padding : ' ';
+					
+					int w = sizeof(tmp);
+					w = w < width ? w : width;
+					while (n < w) {
+						*--q = pad;
+						n++;
+					}
+					
 					ret += x_write(q, n);
 					break;
 				}
@@ -78,6 +119,14 @@ int x_printf(char const *fmt, ...)
 				if (c == '+') {
 					sign = c;
 				}
+				if (c == ' ') {
+					padding = ' ';
+				} else if (isdigit(c)) {
+					if (padding == 0 && c == '0') {
+						padding = c;
+					}
+					width = width * 10 + (c - '0');
+				}
 			}
 			left = right;
 		} else {
@@ -90,6 +139,6 @@ int x_printf(char const *fmt, ...)
 
 int main()
 {
-	x_printf("Hello,%d %s%c\n", INT_MAX, "world", '!');
+	x_printf("Hello,%08x %s%c\n", 0x1234abcd, "world", '!');
 	return 0;
 }
